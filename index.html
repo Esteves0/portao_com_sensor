@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitoramento - Portão Eletrônico</title>
+  
+  <!-- Estilo externo -->
+  <link rel="stylesheet" href="index.css">
+  
+  <!-- Biblioteca MQTT via CDN -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Portão Eletrônico</h2>
+    <p>Broker MQTT: <span id="conexao" class="status offline">Desconectado</span></p>
+    <hr>
+    
+    <div class="info">
+      <strong>Distância:</strong> <span id="distancia">--</span> cm
+    </div>
+    <div class="info">
+      <strong>Presença:</strong> <span id="presenca">--</span>
+    </div>
+    <div class="info">
+      <strong>Estado:</strong> <br>
+      <span id="estado" class="badge fechado">FECHADO</span>
+    </div>
+  </div>
+
+  <!-- Lógica JavaScript externa -->
+  <script src="index.js"></script>
+</body>
+</html>
