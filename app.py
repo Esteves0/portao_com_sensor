@@ -1,21 +1,20 @@
 import os
-import sqlite3
-from flask import Flask, jsonify, request, render_template
+from flask import *
 import paho.mqtt.client as mqtt
+from psycopg2.extras import RealDictCursor
+
 from database import *
 
-# Configurações do Broker
 MQTT_BROKER = "broker.hivemq.com"
 MQTT_PORT = 1883
 MQTT_TOPIC = "equipe/portao/estado"
 
 app = Flask(__name__)
+app.secret_key = "chave_login_portao"
 
-# Controla o último estado processado para evitar gravação dupla
 ultimo_estado = "FECHADO"
 
 
-# --- MQTT ---
 def on_connect(client, userdata, flags, rc, properties=None):
     print("[MQTT] Conectado ao Broker!")
     client.subscribe(MQTT_TOPIC)
@@ -27,7 +26,6 @@ def on_message(client, userdata, msg):
     texto_mensagem = msg.payload.decode()
     print(f"[MQTT] Mensagem recebida no tópico '{msg.topic}': {texto_mensagem}")
 
-    # Registra no banco de dados SOMENTE quando transitar de FECHADO para ABERTO
     if texto_mensagem == 'ABERTO' and ultimo_estado != 'ABERTO':
         ultimo_estado = 'ABERTO'
         print("[MQTT] Portão aberto! Registrando novo acesso no banco de dados...")
@@ -58,9 +56,16 @@ def iniciar_mqtt():
     client.loop_start()
 
 
+@app.route('/')
+def home():
+    return redirect(url_for('login'))
+
 # --- ROTAS ---
-@app.route("/", methods=['GET'])
+@app.route("/index", methods=['GET'])
 def index():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
     conn = conexao()
     cur = conn.cursor()
 
@@ -72,9 +77,45 @@ def index():
     return render_template("index.html", numero_entradas=total_entradas)
 
 
-# --- EXECUÇÃO ---
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        if 'usuario' in session:
+            return redirect(url_for('index'))
+        return render_template('login.html')
+
+    if request.method == 'POST':
+        conn = conexao()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            email = request.form.get('email')
+            password = request.form.get('senha')
+
+            cur.execute('SELECT * FROM "users" WHERE email = %s', (email,))
+            user = cur.fetchone()
+
+            if user:
+                if user['senha'] == password:
+                    session['usuario'] = user['email']
+                    return redirect(url_for('index'))
+                else:
+                    return "Senha incorreta"
+            else:
+                return "Email não registrado"
+        except Exception as e:
+            return f"Ocorreu um erro: {e}"
+        finally:
+            if 'cur' in locals(): cur.close()
+            if 'conn' in locals(): conn.close()
+
+
+@app.route('/logout')
+def logout():
+    session.pop('usuario', None)
+    return redirect(url_for('login'))
+
+
 if __name__ == '__main__':
-    # Garante que o MQTT só inicie uma vez (evita duplicação do reloader do modo debug=True)
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         iniciar_mqtt()
 

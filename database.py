@@ -1,22 +1,16 @@
-import sqlite3
-import os
+import psycopg2
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, "db_portao_esp.db")
+DB_HOST = "localhost"
+DB_NAME = "db_portao_esp"
+DB_USER = "postgres"
+DB_PASSWORD = "1234"
+DB_PORT = 5432
 
 def conexao():
-    return sqlite3.connect(DATABASE)
-
-def criar_tabela():
-    conn = conexao()
-    cur = conn.cursor()
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS acessos (
-            id SERIAL PRIMARY KEY,
-            hora_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-criar_tabela()
+    return psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT
+    )
