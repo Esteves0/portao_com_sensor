@@ -5,37 +5,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monitoramento - Portão Eletrônico</title>
   
-  <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+  <!-- Fonte Google: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
 <body>
 
-  <div class="card">
-    <h2>Portão Eletrônico</h2>
-    <p>Broker MQTT: <span id="conexao" class="status offline">Desconectado</span></p>
-    <hr>
+  <main class="dashboard-container">
+    <!-- Cabeçalho do Painel -->
+    <header class="dashboard-header">
+      <div class="title-group">
+        <div class="icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M4 10l8-7 8 7"/>
+          </svg>
+        </div>
+        <div>
+          <h2>Portão Eletrônico</h2>
+          <p class="subtitle">Painel de telemetria em tempo real</p>
+        </div>
+      </div>
 
-    <div class="info">
-      <strong>Distância:</strong> <span id="distancia">--</span> cm
-    </div>
-    <div class="info">
-      <strong>Presença:</strong> <span id="presenca">--</span>
-    </div>
-    <div class="info">
-      <strong>Estado:</strong> <br>
-      <span id="estado" class="badge fechado">FECHADO</span>
-    </div>
+      <!-- Grupo do Status e Botão de Logout -->
+      <div class="header-actions">
+        <div class="broker-status">
+          <span class="status-dot"></span>
+          <span class="label">Broker:</span>
+          <span id="conexao" class="status offline">{{ estado_broker }}</span>
+        </div>
 
-    <!-- Exibe o total retornado pelo Flask através do Jinja2 -->
-    <div class="info">
-      <strong>Total de Entradas:</strong> <br>
-      <span id="entradas">{{ numero_entradas }}</span>
-    </div>
-  </div>
+        <!-- Botão de Sair -->
+        <a href="{{ url_for('logout') }}" class="btn-logout" title="Encerrar sessão">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Sair</span>
+        </a>
+      </div>
+    </header>
 
-  <!-- Script JS puxado da pasta static -->
+    <!-- Grid de Métricas -->
+    <section class="metrics-grid">
+      
+      <!-- Card: Estado do Portão -->
+      <div class="metric-card main-status">
+        <div class="card-header">
+          <span class="card-title">Estado do Portão</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <div class="card-body">
+          <span id="estado" class="badge fechado">{{ estado_portao }}</span>
+        </div>
+      </div>
+
+      <!-- Card: Distância -->
+      <div class="metric-card">
+        <div class="card-header">
+          <span class="card-title">Distância</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 12h20M6 8v8M18 8v8M12 10v4"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="value-unit">
+            <span id="distancia" class="metric-value">{{ distancia }}</span>
+            <span class="unit">cm</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Presença -->
+      <div class="metric-card">
+        <div class="card-header">
+          <span class="card-title">Sensor de Presença</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        <div class="card-body">
+          <span id="presenca" class="metric-value-text">{{ presenca }}</span>
+        </div>
+      </div>
+
+      <!-- Card: Total de Entradas -->
+      <div class="metric-card">
+        <div class="card-header">
+          <span class="card-title">Total de Entradas</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <polyline points="17 11 19 13 23 9"></polyline>
+          </svg>
+        </div>
+        <div class="card-body">
+          <span id="entradas" class="metric-value highlight">{{ numero_entradas }}</span>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
   <script src="{{ url_for('static', filename='index.js') }}"></script>
-  
 </body>
 </html>
