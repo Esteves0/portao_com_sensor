@@ -135,6 +135,29 @@ def logout():
     session.pop('usuario', None)
     return redirect(url_for('login'))
 
+@app.route('/api/status', methods=['GET'])
+def api_status():
+    if 'usuario' not in session:
+        return jsonify({'error': 'Não autorizado'}), 401
+
+    total_entradas = 0
+    try:
+        conn = conexao()
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM acessos")
+        total_entradas = cur.fetchone()[0]
+        conn.close()
+    except Exception as e:
+        print(f"[ERRO BANCO API] {e}")
+
+    return jsonify({
+        'distancia': ultima_distancia,
+        'presenca': ultima_presenca,
+        'estado_broker': estado_con_broker,
+        'estado_portao': ultimo_estado,
+        'numero_entradas': total_entradas
+    })
+
 
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
