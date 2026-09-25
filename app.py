@@ -8,6 +8,7 @@ from database import *
 MQTT_BROKER = "broker.hivemq.com"
 MQTT_PORT = 1883
 MQTT_TOPIC = "equipe/portao/estado"
+MQTT_TOPIC_DISTANCE = "equipe/portao/distance"
 
 app = Flask(__name__)
 app.secret_key = "chave_login_portao"
@@ -43,6 +44,9 @@ def on_message(client, userdata, msg):
     elif texto_mensagem == 'FECHADO':
         ultimo_estado = 'FECHADO'
 
+def get_distance(msg):
+    distance = msg.payload.decode()
+    print(f"[MQTT] Distancia recebida: {distance}")
 
 def iniciar_mqtt():
     try:
