@@ -1,6 +1,6 @@
 def presenca_detectada(distancia):
     # Considera presença se a distância for entre 1cm e 10cm
-    return 0 < distancia <= 10
+    return 0 < distancia <= 50
 
 
 def status_portao(distancia):

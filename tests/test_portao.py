@@ -6,7 +6,8 @@ def test_presenca_detectada_True():
     assert presenca_detectada(7) == True
 
 def test_presenca_detectada_False():
-    assert presenca_detectada(25) == False
+    # Alterado de 25 para 60 (qualquer valor acima de 50 deve retornar False)
+    assert presenca_detectada(60) == False
 
 
 # --- TESTES DE ESTADO DO PORTÃO ---
@@ -15,7 +16,8 @@ def test_status_portao_ABERTO():
     assert status_portao(5) == "ABERTO"
 
 def test_status_portao_FECHADO():
-    assert status_portao(40) == "FECHADO"
+    # Alterado de 40 para 60 (qualquer valor acima de 50 deve manter o portão FECHADO)
+    assert status_portao(60) == "FECHADO"
 
 
 # --- TESTE DE FORMATO DOS DADOS (DICIONÁRIO / JSON) ---
